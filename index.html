@@ -91,7 +91,50 @@
   @media (max-width:980px){ .split{grid-template-columns:minmax(0,1fr);gap:30px} }
 
   /* questions */
-  .q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:24px 24px 26px;margin-bottom:14px}
+  .q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:20px 22px 22px;margin:0}
+
+  /* Two-up where the content allows, so the form is a screen or two, not six. */
+  #form{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  #form > .q{grid-column:1/-1}
+  #form > .q.half{grid-column:span 1}
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  .ao-grid{display:grid;grid-template-columns:1fr;gap:0 28px}
+  :root[data-detail="off"] .ao-grid{grid-template-columns:1fr}
+  /* One line per add-on in the compact view: name, help link, quantity. */
+  :root[data-detail="off"] .ao-grid .field{margin-bottom:7px}
+  :root[data-detail="off"] .ao-grid .check{padding:6px 0}
+  :root[data-detail="off"] .ao-grid .field-label.stack{flex-direction:row;align-items:center;
+    gap:9px;max-width:none}
+  .ao-grid .check > div{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:9px}
+  .ao-grid .check > div .hint{flex-basis:100%}
+  :root[data-detail="off"] .rc-file{display:none}
+  .ao-link{font-size:.8rem;font-weight:500;color:var(--muted);white-space:nowrap;
+    text-decoration:underline;text-decoration-color:var(--green);text-underline-offset:3px}
+  .ao-link:hover{color:var(--black)}
+  .ao-grid .check{border-top:0;padding:9px 0}
+  @media (max-width:1180px){
+    #form{grid-template-columns:1fr}
+    #form > .q.half{grid-column:1/-1}
+    .vgrid,.ao-grid{grid-template-columns:1fr}
+  }
+
+  /* Details off is the working view: prose hidden, rhythm tightened. */
+  :root[data-detail="off"] .q-note,
+  :root[data-detail="off"] .aibox,
+  :root[data-detail="off"] .freebox,
+  :root[data-detail="off"] .scale,
+  :root[data-detail="off"] .hint.ex,
+  :root[data-detail="off"] .notes,
+  :root[data-detail="off"] .chan-n{display:none}
+  :root[data-detail="off"] .lede{display:none}
+  :root[data-detail="off"] .masthead h1{font-size:clamp(1.6rem,3.2vw,2.3rem);max-width:30ch}
+  :root[data-detail="off"] .masthead{padding-top:26px;padding-bottom:4px}
+  :root[data-detail="off"] .channels{margin-top:16px}
+  :root[data-detail="off"] .q{padding:15px 20px 17px}
+  :root[data-detail="off"] .field{margin-bottom:13px}
+  :root[data-detail="off"] .s-head{margin-bottom:12px}
+  :root[data-detail="off"] .freebox{padding:13px 16px}
+  :root[data-detail="off"] .chan-in{padding:11px 16px}
   .q-head{display:flex;align-items:center;gap:11px;margin-bottom:7px}
   .q-num{width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--on-brand);
     font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
@@ -106,7 +149,7 @@
   .chip:hover{border-color:var(--green)}
   .chip:focus-visible{outline:2px solid var(--black);outline-offset:2px}
 
-  .field{margin-bottom:22px}
+  .field{margin-bottom:17px}
   .field:last-child{margin-bottom:0}
   .field-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px}
   .field-label{font-weight:500;font-size:.97rem;display:flex;align-items:center;gap:9px}
@@ -421,6 +464,10 @@
     try { t = localStorage.getItem("wati-theme"); } catch(e){}
     // Light is the default everywhere; dark is opt-in and remembered per browser.
     document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+    // Details off is the default: the compact view an AE uses on a call.
+    var d = null;
+    try { d = localStorage.getItem("wati-detail"); } catch(e){}
+    document.documentElement.setAttribute("data-detail", d === "on" ? "on" : "off");
   })();
 </script>
 </head>
@@ -446,6 +493,16 @@
       <div class="ctrl" id="langBox" hidden>
         <label class="ctrl-l" for="langPick" data-i18n="ctrlLang">Language</label>
         <div class="selwrap"><select id="langPick"></select></div>
+      </div>
+      <div class="ctrl">
+        <span class="ctrl-l" data-i18n="ctrlDetail">Details</span>
+        <button type="button" class="switch" id="detailBtn" role="switch" aria-checked="false">
+          <span class="knob">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 7.5h14M5 12h14M5 16.5h9"/></svg>
+          </span>
+          <span class="sr" data-i18n="srDetail">Show the explanatory notes</span>
+        </button>
       </div>
       <div class="ctrl">
         <span class="ctrl-l" data-i18n="ctrlTheme">Dark mode</span>
@@ -510,7 +567,7 @@
 <button aria-pressed="true" class="chip" data-i18n="t009" data-usecase="mixed" type="button">A mix of all of it</button>
 </div>
 </section>
-<section class="q">
+<section class="q half">
 <div class="q-head"><span class="q-num">3</span><h2 data-i18n="t010">How many WhatsApp numbers?</h2></div>
 <p class="q-note" data-i18n="t011">One number suits most businesses. Separate numbers need Business, and each extra is billed monthly.</p>
 <div class="field">
@@ -524,7 +581,7 @@
 <div class="scale"><span>1</span><span>5</span><span>10+</span></div>
 </div>
 </section>
-<section class="q">
+<section class="q half">
 <div class="q-head"><span class="q-num">4</span><h2 data-i18n="t013">How many people need a login?</h2></div>
 <p class="q-note" data-i18n="t014">Everyone answering chats needs a seat. Growth includes 3 and cannot be topped up at any price.</p>
 <div class="field">
@@ -541,6 +598,7 @@
 <section class="q">
 <div class="q-head"><span class="q-num">5</span><h2 data-i18n="t016">How many messages a month?</h2></div>
 <p class="q-note" data-i18n="t017">WhatsApp bills per delivered message by category, not per contact. Split your monthly volume across the three that cost money.</p>
+<div class="vgrid">
 <div class="field">
 <div class="field-top">
 <span class="field-label" data-i18n="t018"><i class="dot d-mkt"></i>Marketing<span class="sr" data-i18n="srMsgs"> messages per month</span></span>
@@ -571,12 +629,13 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t024">Service messages a month
-            <span class="hint" data-i18n="t025">Free-form replies you send inside the 24-hour window. Billable per message from 1 Oct 2026, after the first 1,000 a month. Inbound is always free. <a data-i18n="t026" href="https://support.wati.io/en/articles/16954666-whatsapp-business-platform-api-pricing-changes-service-messages-and-click-to-message-ads" rel="noopener" target="_blank">What changed</a></span>
+            <span class="hint ex" data-i18n="t025">Free-form replies you send inside the 24-hour window. Billable per message from 1 Oct 2026, after the first 1,000 a month. Inbound is always free. <a data-i18n="t026" href="https://support.wati.io/en/articles/16954666-whatsapp-business-platform-api-pricing-changes-service-messages-and-click-to-message-ads" rel="noopener" target="_blank">What changed</a></span>
 </span>
 <input aria-label="Service messages per month" class="num" id="svcNum" max="2000000" min="0" step="100" type="number" value="0"/>
 </div>
 <input aria-label="Service messages slider" id="svcRange" max="50000" min="0" step="100" type="range" value="0"/>
 <div class="scale"><span>0</span><span>25,000</span><span>50,000+</span></div>
+</div>
 </div>
 <div class="mix">
 <div class="mix-t"><span data-i18n="mixT">Your message mix</span><b id="mixTotal">—</b></div>
@@ -600,7 +659,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t035">Automation triggers a month
-            <span class="hint" data-i18n="t036">Roughly one per customer who starts an automated chat, plus one per automated follow-up. API-initiated actions don't count.</span>
+            <span class="hint ex" data-i18n="t036">Roughly one per customer who starts an automated chat, plus one per automated follow-up. API-initiated actions don't count.</span>
 </span>
 <input aria-label="Automation triggers per month" class="num" id="trigNum" max="1000000" min="0" step="100" type="number" value="2000"/>
 </div>
@@ -615,7 +674,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t039">Wati AI credits a month
-            <span class="hint" data-i18n="t040">One pool shared by Wati AI and Astra. Free each month: 2,000 Growth, 5,000 Pro, 20,000 Business. Leave at 0 if the team won't use AI.</span>
+            <span class="hint ex" data-i18n="t040">One pool shared by Wati AI and Astra. Free each month: 2,000 Growth, 5,000 Pro, 20,000 Business. Leave at 0 if the team won't use AI.</span>
 </span>
 <input aria-label="Wati AI credits per month" class="num" id="aiNum" max="500000" min="0" step="500" type="number" value="0"/>
 </div>
@@ -625,7 +684,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="agentsAi">Astra AI agents you need
-            <span class="hint" data-i18n="agentsAiHint">Growth 1, Pro 2, Business unlimited. Ask for more than the plan allows and it's ruled out.</span>
+            <span class="hint ex" data-i18n="agentsAiHint">Growth 1, Pro 2, Business unlimited. Ask for more than the plan allows and it's ruled out.</span>
 </span>
 <input aria-label="Astra AI agents" class="num" id="aiAgentNum" max="50" min="0" step="1" type="number" value="1"/>
 </div>
@@ -655,8 +714,6 @@
 <div><label data-i18n="shopify" for="needShopify">Connect Shopify</label>
 <span class="hint" data-i18n="shopifyHint">Needed for abandoned-cart, COD confirmation and automated order updates. $4.99 a month, billed in USD.</span></div>
 </div>
-</section>
-<section class="q">
 </section>
 </form>
 <aside aria-label="Cost estimate" class="rcol">
@@ -781,7 +838,7 @@
      English is always the fallback and is captured from the markup at load,
      so a missing key simply shows the English.
      ------------------------------------------------------------------ */
-  var LANGS = {"pt": {"agentsAi": "Agentes de IA do Astra necessários", "agentsAiHint": "Growth 1, Pro 2, Business ilimitado. Peça mais do que o plano permite e ele é descartado.", "and": "e", "aoBilled": "cobrados em pacotes de 5", "aoFree": "incluído neste plano", "aoLearn": "O que isso faz", "ao_apihigh": "API de alto volume", "ao_apihigh_h": "Limite de pico de até 200 chamadas de API a cada 10 segundos.", "ao_apilimit": "Aumento do limite mensal da API", "ao_apilimit_h": "Teto mensal de API de até 40 milhões de chamadas.", "ao_blitz": "Blitz: 200 mensagens por segundo", "ao_blitz_h": "Velocidade de disparo de até 200 mensagens por segundo, para envios urgentes.", "ao_byoa": "BYOA — traga seu próprio agente de IA", "ao_byoa_h": "Conecte um agente de IA de terceiros, cobrado por agente. Agentes Astra vêm com o plano e não são cobrados aqui.", "ao_ctwa": "Anúncios de clique para WhatsApp", "ao_ctwa_h": "Rastreamento e atribuição de cliques de anúncios do Facebook e Instagram, com painel de analytics e Google Ads. Grátis a partir do Pro.", "ao_forms": "Formulários", "ao_forms_h": "Até 25 formulários do WhatsApp para agendamentos, inscrições e captação.", "ao_masking": "Mascaramento do número", "ao_masking_h": "Mascara o número do cliente na caixa de entrada. Normalmente por conformidade.", "ao_opprivacy": "Privacidade do operador", "ao_opprivacy_h": "Oculta os dados de contato do cliente dos operadores durante a conversa.", "ao_opscope": "Escopo do operador", "ao_opscope_h": "Cada operador vê só as conversas atribuídas a ele, não a caixa compartilhada inteira.", "ao_roundrobin": "Distribuição de conversas por rodízio", "ao_roundrobin_h": "Distribui as conversas recebidas igualmente entre os atendentes disponíveis.", "b029": "As primeiras 1.000 mensagens de serviço por mês", "b030": "Conversas vindas de anúncios de clique para WhatsApp.", "b031": "Mudou em 1 de outubro de 2026:", "b042": "Os agentes do Astra vêm com o plano", "b043": "Um único saldo de créditos.", "b044": "Os créditos não acumulam.", "b045": "As recargas começam em 2.000.", "billedIn": "faturado em", "ccyBilling": "moeda de faturamento", "chanInc": "Em todos os planos, sem taxa de plataforma extra", "chanNote": "Esta calculadora precifica o WhatsApp. Os outros canais usam a mesma caixa de entrada, automações e agentes Astra — peça as tarifas de RCS e SMS à parte.", "chanPaid": "Também disponível, cobrado por mensagem", "copied": "Copiado — cole no seu e-mail", "copyFail": "Falha ao copiar", "ctrlCcy": "Mostrar preços em", "ctrlCycle": "Ciclo de cobrança", "ctrlLang": "Idioma", "ctrlTheme": "Modo escuro", "cycShown": "{0} · em {1}", "cycSub_annual": "plano com cobrança anual", "cycSub_monthly": "plano com cobrança mensal", "cycSub_quarterly": "plano com cobrança trimestral", "cyc_annual": "Anual", "cyc_monthly": "Mensal", "cyc_quarterly": "Trimestral", "dg_addons": "Complementos", "dg_credits": "Créditos de Wati AI extras", "dg_messages": "Mensagens", "dg_numbers": "Números de WhatsApp adicionais", "dg_plan": "Mensalidade do plano", "dg_seats": "Usuários adicionais", "dg_triggers": "Disparos extras", "discApplies": "sobre o pacote inteiro — altere qualquer linha abaixo", "discEff": "da conta", "discLabel": "Desconto que você pode dar", "discNet": "com desconto", "discOff": "Você abre mão de", "discPerMonth": "por mês", "discYear": "abdicado ao longo de um ano", "free": "Grátis", "fxAsOfDate": "13 de agosto de 2026", "fxBy": "taxas da {0}", "fxDated": "taxa de {0}", "fxLatest": "última taxa publicada", "fxLoading": "Buscando as taxas de câmbio de hoje…", "fxOffline": "Sem taxas ao vivo: usando as de referência de {0}. Não cote com estas.", "fxRefresh": "Atualizar taxas", "grpAgent": "Por agente de IA", "grpMonth": "Mensal, valor fixo", "grpRest": "Resto do mundo", "grpUser": "Por usuário, em pacotes de cinco", "hintCountry": "No {0}, uma mensagem de marketing para {1} custa {2} e uma de utilidade {3}. Troque de país e toda a conta é recalculada.", "hintNumber1": "Um número. Qualquer plano dá conta.", "hintNumbers": "{0} números: só o plano Business permite, mais {1} por mês para cada um além do primeiro.", "hintSeatsOk": "O Growth vai até 3. Pro e Business incluem 5.", "hintSeatsOver": "Com {0} usuários o Growth sai, porque o limite dele é 3.", "langLabel": "Idioma", "lede": "Oito perguntas rápidas. A conta se detalha sozinha; depois escolha a moeda e leve em PDF.", "mixMsgs": "mensagens por mês", "mixNone": "Informe acima os volumes mensais e a mistura aparece aqui.", "mixSvc": "Serviço", "mixT": "Sua mistura de mensagens", "notesH": "O que está sendo assumido aqui, para você conferir.", "pAllIn": "por mês, tudo incluído", "pExtraSeats": "{0} usuários extras {1}", "pMsgs": "Mensagens {0}, marketing a {1}", "pPlan": "Plano {0}", "pSeatsFixed": "{0} usuários incluídos, sem como adicionar mais", "pSeatsInc": "{0} usuários incluídos", "pTrigOk": "{0} disparos, sobra para você", "pTrigTop": "Recarga de disparos {0} (faixa de {1})", "perAgent": "por agente", "perMonth": "por mês", "perUser": "por usuário", "q1note": "O WhatsApp cobra pelo país a que pertence o número do seu cliente, não por onde fica a sua empresa. As tarifas variam muito entre mercados, então comece por aqui.", "q7h": "IA, Astra e créditos", "q7n": "O Astra vem com todos os planos. Os créditos são um saldo único; o que passar é cobrado por faixas.", "q8h": "Complementos", "q8n": "Preços direto da tabela desta região. Complementos por usuário vêm em pacotes de cinco: 8 operadores são cobrados como 10.", "rAddon": "{0} exige {1} ou superior.", "rAgents1": "Vem com {0} agente do Astra; você pediu {1}.", "rAgentsN": "Vem com {0} agentes do Astra; você pediu {1}.", "rAuth": "Mensagens de autenticação", "rCap": "Os disparos em massa têm limite de {0} por mês; seu volume de marketing mais utilidade é {1}.", "rCredits": "créditos de Wati AI", "rExtraCredits": "Créditos de Wati AI extras", "rExtraNumbers": "números de WhatsApp adicionais", "rExtraTriggers": "Disparos de automação extras", "rExtraUsers": "usuários adicionais", "rMarketing": "Mensagens de marketing", "rMsgHead": "Mensagens — da sua carteira pré-paga", "rMsgTotal": "Subtotal da carteira", "rNumbers": "Suporta um número de WhatsApp; você precisa de {0}.", "rPlan": "plano", "rSeats": "Inclui {0} usuários e não aceita mais; você precisa de {1}.", "rService": "Mensagens de serviço", "rShopify": "Integração com Shopify", "rSubHead": "Assinatura — cobrada no ciclo do seu plano", "rSubTotal": "Subtotal da assinatura", "rSvcFree": "Mensagens de serviço, cota gratuita", "rTriggers": "disparos", "rUsers": "usuários", "rUtility": "Mensagens de utilidade", "rVoice": "Agentes de voz são só do Business.", "rcDate": "1 de outubro de 2026", "rcEffective": "Em vigor desde {0}.", "rcFolder": "Se o link abrir uma pasta, escolha o arquivo indicado no botão.", "rcHead": "As tabelas por trás destes números", "rnInr": "Os preços do plano e por mensagem estão em INR, então não há conversão. A única exceção é a integração com a Shopify, cobrada em USD a US$ 4,99 por mês.", "rnUsd": "Na tabela, as tarifas por mensagem estão em USD. Se o plano for cobrado em outra moeda, as duas são convertidas para a moeda escolhida acima, pelo câmbio de hoje.", "shopify": "Conectar o Shopify", "shopifyHint": "Necessário para carrinho abandonado, confirmação de pagamento na entrega e avisos automáticos. US$ 4,99 por mês em USD.", "srCountry": "País onde estão seus clientes", "srMsgs": " mensagens por mês", "svcLower": "As mensagens de serviço têm tarifa própria por país, menor que a de utilidade.", "svcSame": "Nesta tabela as mensagens de serviço são cobradas pela tarifa de utilidade.", "t001": "Descubra quanto o WhatsApp vai realmente custar por mês.", "t002": "Onde estão os seus clientes?", "t003": "Para que você usa o WhatsApp?", "t004": "Define números iniciais razoáveis. Tudo continua editável.", "t005": "Promoções e campanhas", "t006": "Atendimento ao cliente", "t007": "Avisos de pedido e entrega", "t008": "Logins e OTPs", "t009": "Um pouco de tudo", "t010": "Quantos números de WhatsApp?", "t011": "Um número atende à maioria. Números separados exigem o Business, e cada extra é cobrado por mês.", "t012": "Números conectados à Wati", "t013": "Quantas pessoas precisam de acesso?", "t014": "Todo mundo que responde conversas precisa de uma licença. O Growth inclui 3 e não permite ampliação por preço nenhum.", "t015": "Membros da equipe com acesso à Wati", "t016": "Quantas mensagens por mês?", "t017": "O WhatsApp cobra por mensagem entregue conforme a categoria, não por contato. Distribua seu volume mensal entre as três que custam.", "t018": "Marketing", "t019": "Ofertas, lançamentos, reengajamento, carrinho abandonado. De longe a categoria mais cara.", "t020": "Utilidade", "t021": "Avisos de pedido, entrega, pagamento e agendamento — tudo ligado a uma transação já feita.", "t022": "Autenticação", "t023": "Apenas senhas de uso único e códigos de acesso.", "t024": "Mensagens de serviço por mês", "t025": "Respostas livres enviadas por você na janela de 24 h. Cobradas por mensagem desde 1º out 2026, após as primeiras 1.000 do mês. O que entra é sempre grátis.", "t026": "O que mudou", "t027": "O que continua sem custo", "t028": "Tudo o que o cliente envia para você é gratuito.", "t029": ", por conta do WhatsApp Business, com reinício mensal.", "t030": "Grátis hoje. A Meta vai ampliar a janela para 7 dias; data a confirmar.", "t031": "as mensagens de serviço passam a ser cobradas por mensagem, e os modelos de utilidade dentro da janela de 24 h voltam a ser cobrados.", "t032": "Quanto roda no automático?", "t033": "Contado sempre que uma automação sua dispara para um cliente: chatbot, palavra-chave, regra de roteamento, sequência ou Flow. Se acabarem, as automações param até você recarregar. Extras são cobrados por faixas.", "t034": "Como os disparos são contados e cobrados", "t035": "Disparos de automação por mês", "t036": "Cerca de um por cliente que inicia uma conversa automatizada, mais um por acompanhamento automático. Ações por API não contam.", "t039": "Créditos de Wati AI por mês", "t040": "Um saldo compartilhado entre Wati AI e Astra. Grátis por mês: 2.000 Growth, 5.000 Pro, 20.000 Business. Deixe em 0 se a equipe não for usar IA.", "t041": "O Astra está incluído e os créditos agora são um saldo só", "t042": "— 1 no Growth, 2 no Pro, ilimitados no Business. IA de voz só no Business. Sem assinatura separada do Astra.", "t043": "o mesmo saldo cobre Wati AI e Astra. Os antigos créditos do AI Co-pilot foram descontinuados.", "t044": "expiram na sua data de faturamento e voltam ao valor do plano. Recargas também não acumulam.", "t045": "os pacotes de 1.000 créditos acabaram e o preço por crédito caiu pela metade.", "t046": "Como funcionam os planos em pacote e os créditos de IA, incluindo acúmulo", "t047": "Custo mensal estimado", "t048": "Wati Pro", "t049": "Melhor opção", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Total por mês", "t054": "Média por mensagem", "t055": "Anual", "t056": "Salvar como PDF", "t057": "Copiar para e-mail", "t058": "Os mesmos requisitos, precificados nos três planos", "t059": "Um plano mais barato nem sempre dá uma conta mais barata depois de contar usuários, recargas e tarifas por plano.", "t060": "Preços de plano, licença e complementos são os publicados. As tarifas por mensagem vêm da tabela desta região, em vigor desde 1º de outubro de 2026, conforme o país do destinatário. Níveis mais altos custam menos por mensagem.", "t061": "As tabelas estão com link na pergunta 1: abra a fonte na ligação em vez de citar de memória.", "t062": "A estimativa escolhe o plano mais barato que serve. Fixe um plano para cotar mais alto; o que ele não cobrir fica fora do total e é sinalizado.", "t063": "O limite de 15.000 disparos do Growth é comparado a marketing mais utilidade. Autenticação é por API, uma a uma, e não conta.", "t064": "Disparos incluídos: 1.000 / 2.000 / 5.000. Extras vão por faixas: você paga a primeira que te cobre.", "t065": "Créditos de Wati AI incluídos: 2.000 / 5.000 / 20.000, um saldo entre Wati AI e Astra. Extras vão por faixas e não acumulam.", "t066": "Agentes Astra vêm com o plano: 1 / 2 / ilimitados, IA de voz só no Business. Não é assinatura separada.", "t067": "Números extras exigem o Business. O Shopify é US$ 4,99 por mês em USD, então varia com o câmbio.", "t068": "As cobranças de mensagens saem de uma carteira pré-paga, separada da fatura da assinatura.", "t069": "Descontos por volume acima de cerca de um milhão de mensagens por mês não são modelados. Também fora: onboarding dedicado, gestão técnica de conta, serviços profissionais e selo verde.", "t070": "Estimativa mensal", "t071": "As taxas de câmbio vêm do Frankfurter, com a Exchange Rate API como reserva. Ambos publicam uma vez por dia, então é uma taxa de referência diária, não de fechamento. A Wati fatura em ; a taxa do seu banco no dia vai diferir um pouco.", "tagNoFit": "Não serve", "tagQuoting": "Cotando", "toolname": "Calculadora de custos do WhatsApp", "vCheapest": "<b>{0}</b> é o plano mais barato que atende ao que você pediu.", "vMsgShare": "As mensagens são {0}% do custo; a assinatura é a parte pequena.", "vNone": "Nenhum plano padrão cobre isso, então precisa de uma cotação sob medida. Mostrando o mais próximo.", "vOut1": "{0} está fora: {1}", "vOutMany": "{0} estão fora{1}.", "vPayg": "Nesse volume, {0} pode sair mais barato que qualquer assinatura; vale olhar.", "vPinned": "Você fixou <b>{0}</b>.", "vPinnedBest": "É também o plano mais barato que serve.", "vPinnedLess": "O mais barato que serve é <b>{0}</b> a {1}, então este custa {2} a menos por mês.", "vPinnedMore": "O mais barato que serve é <b>{0}</b> a {1}, então este custa {2} a mais por mês.", "vTierUp": "{0} também atende, mas custa {1} a mais por mês: as tarifas por mensagem são maiores e, nesse volume, isso pesa mais que a mensalidade menor.", "voice": "Preciso de um agente de IA de voz", "voiceHint": "A IA de voz é exclusiva do Business: marcar isto descarta Growth e Pro.", "wbPlain": "Não deu para carregar as taxas ao vivo, então o total usa taxas de referência. Clique em Atualizar taxas no painel antes de cotar.", "wbUsd": "Não deu para carregar as taxas ao vivo. As mensagens são cobradas em USD, então o total usa uma taxa de referência. Clique em Atualizar taxas no painel antes de cotar.", "whNote": "O Growth só trata regras por palavra-chave. Chatbots de várias etapas e webhooks começam no Pro.", "regionNote": "Cobrança no Brasil em reais, pela lista MAC 2026. Usa a tabela LATAM."}};
+  var LANGS = {"pt": {"agentsAi": "Agentes de IA do Astra necessários", "agentsAiHint": "Growth 1, Pro 2, Business ilimitado. Peça mais do que o plano permite e ele é descartado.", "and": "e", "aoBilled": "cobrados em pacotes de 5", "aoFree": "incluído neste plano", "aoLearn": "O que isso faz", "ao_apihigh": "API de alto volume", "ao_apihigh_h": "Limite de pico de até 200 chamadas de API a cada 10 segundos.", "ao_apilimit": "Aumento do limite mensal da API", "ao_apilimit_h": "Teto mensal de API de até 40 milhões de chamadas.", "ao_blitz": "Blitz: 200 mensagens por segundo", "ao_blitz_h": "Velocidade de disparo de até 200 mensagens por segundo, para envios urgentes.", "ao_byoa": "BYOA — traga seu próprio agente de IA", "ao_byoa_h": "Conecte um agente de IA de terceiros, cobrado por agente. Agentes Astra vêm com o plano e não são cobrados aqui.", "ao_ctwa": "Anúncios de clique para WhatsApp", "ao_ctwa_h": "Rastreamento e atribuição de cliques de anúncios do Facebook e Instagram, com painel de analytics e Google Ads. Grátis a partir do Pro.", "ao_forms": "Formulários", "ao_forms_h": "Até 25 formulários do WhatsApp para agendamentos, inscrições e captação.", "ao_masking": "Mascaramento do número", "ao_masking_h": "Mascara o número do cliente na caixa de entrada. Normalmente por conformidade.", "ao_opprivacy": "Privacidade do operador", "ao_opprivacy_h": "Oculta os dados de contato do cliente dos operadores durante a conversa.", "ao_opscope": "Escopo do operador", "ao_opscope_h": "Cada operador vê só as conversas atribuídas a ele, não a caixa compartilhada inteira.", "ao_roundrobin": "Distribuição de conversas por rodízio", "ao_roundrobin_h": "Distribui as conversas recebidas igualmente entre os atendentes disponíveis.", "b029": "As primeiras 1.000 mensagens de serviço por mês", "b030": "Conversas vindas de anúncios de clique para WhatsApp.", "b031": "Mudou em 1 de outubro de 2026:", "b042": "Os agentes do Astra vêm com o plano", "b043": "Um único saldo de créditos.", "b044": "Os créditos não acumulam.", "b045": "As recargas começam em 2.000.", "billedIn": "faturado em", "ccyBilling": "moeda de faturamento", "chanInc": "Em todos os planos, sem taxa de plataforma extra", "chanNote": "Esta calculadora precifica o WhatsApp. Os outros canais usam a mesma caixa de entrada, automações e agentes Astra — peça as tarifas de RCS e SMS à parte.", "chanPaid": "Também disponível, cobrado por mensagem", "copied": "Copiado — cole no seu e-mail", "copyFail": "Falha ao copiar", "ctrlCcy": "Mostrar preços em", "ctrlCycle": "Ciclo de cobrança", "ctrlDetail": "Detalhes", "ctrlLang": "Idioma", "ctrlTheme": "Modo escuro", "cycShown": "{0} · em {1}", "cycSub_annual": "plano com cobrança anual", "cycSub_monthly": "plano com cobrança mensal", "cycSub_quarterly": "plano com cobrança trimestral", "cyc_annual": "Anual", "cyc_monthly": "Mensal", "cyc_quarterly": "Trimestral", "dg_addons": "Complementos", "dg_credits": "Créditos de Wati AI extras", "dg_messages": "Mensagens", "dg_numbers": "Números de WhatsApp adicionais", "dg_plan": "Mensalidade do plano", "dg_seats": "Usuários adicionais", "dg_triggers": "Disparos extras", "discApplies": "sobre o pacote inteiro — altere qualquer linha abaixo", "discEff": "da conta", "discLabel": "Desconto que você pode dar", "discNet": "com desconto", "discOff": "Você abre mão de", "discPerMonth": "por mês", "discYear": "abdicado ao longo de um ano", "free": "Grátis", "fxAsOfDate": "13 de agosto de 2026", "fxBy": "taxas da {0}", "fxDated": "taxa de {0}", "fxLatest": "última taxa publicada", "fxLoading": "Buscando as taxas de câmbio de hoje…", "fxOffline": "Sem taxas ao vivo: usando as de referência de {0}. Não cote com estas.", "fxRefresh": "Atualizar taxas", "grpAgent": "Por agente de IA", "grpMonth": "Mensal, valor fixo", "grpRest": "Resto do mundo", "grpUser": "Por usuário, em pacotes de cinco", "hintCountry": "No {0}, uma mensagem de marketing para {1} custa {2} e uma de utilidade {3}. Troque de país e toda a conta é recalculada.", "hintNumber1": "Um número. Qualquer plano dá conta.", "hintNumbers": "{0} números: só o plano Business permite, mais {1} por mês para cada um além do primeiro.", "hintSeatsOk": "O Growth vai até 3. Pro e Business incluem 5.", "hintSeatsOver": "Com {0} usuários o Growth sai, porque o limite dele é 3.", "langLabel": "Idioma", "lede": "Oito perguntas rápidas. A conta se detalha sozinha; depois escolha a moeda e leve em PDF.", "mixMsgs": "mensagens por mês", "mixNone": "Informe acima os volumes mensais e a mistura aparece aqui.", "mixSvc": "Serviço", "mixT": "Sua mistura de mensagens", "notesH": "O que está sendo assumido aqui, para você conferir.", "pAllIn": "por mês, tudo incluído", "pExtraSeats": "{0} usuários extras {1}", "pMsgs": "Mensagens {0}, marketing a {1}", "pPlan": "Plano {0}", "pSeatsFixed": "{0} usuários incluídos, sem como adicionar mais", "pSeatsInc": "{0} usuários incluídos", "pTrigOk": "{0} disparos, sobra para você", "pTrigTop": "Recarga de disparos {0} (faixa de {1})", "perAgent": "por agente", "perMonth": "por mês", "perUser": "por usuário", "q1note": "O WhatsApp cobra pelo país a que pertence o número do seu cliente, não por onde fica a sua empresa. As tarifas variam muito entre mercados, então comece por aqui.", "q7h": "IA, Astra e créditos", "q7n": "O Astra vem com todos os planos. Os créditos são um saldo único; o que passar é cobrado por faixas.", "q8h": "Complementos", "q8n": "Preços direto da tabela desta região. Complementos por usuário vêm em pacotes de cinco: 8 operadores são cobrados como 10.", "rAddon": "{0} exige {1} ou superior.", "rAgents1": "Vem com {0} agente do Astra; você pediu {1}.", "rAgentsN": "Vem com {0} agentes do Astra; você pediu {1}.", "rAuth": "Mensagens de autenticação", "rCap": "Os disparos em massa têm limite de {0} por mês; seu volume de marketing mais utilidade é {1}.", "rCredits": "créditos de Wati AI", "rExtraCredits": "Créditos de Wati AI extras", "rExtraNumbers": "números de WhatsApp adicionais", "rExtraTriggers": "Disparos de automação extras", "rExtraUsers": "usuários adicionais", "rMarketing": "Mensagens de marketing", "rMsgHead": "Mensagens — da sua carteira pré-paga", "rMsgTotal": "Subtotal da carteira", "rNumbers": "Suporta um número de WhatsApp; você precisa de {0}.", "rPlan": "plano", "rSeats": "Inclui {0} usuários e não aceita mais; você precisa de {1}.", "rService": "Mensagens de serviço", "rShopify": "Integração com Shopify", "rSubHead": "Assinatura — cobrada no ciclo do seu plano", "rSubTotal": "Subtotal da assinatura", "rSvcFree": "Mensagens de serviço, cota gratuita", "rTriggers": "disparos", "rUsers": "usuários", "rUtility": "Mensagens de utilidade", "rVoice": "Agentes de voz são só do Business.", "rcDate": "1 de outubro de 2026", "rcEffective": "Em vigor desde {0}.", "rcFolder": "Se o link abrir uma pasta, escolha o arquivo indicado no botão.", "rcHead": "As tabelas por trás destes números", "rnInr": "Os preços do plano e por mensagem estão em INR, então não há conversão. A única exceção é a integração com a Shopify, cobrada em USD a US$ 4,99 por mês.", "rnUsd": "Na tabela, as tarifas por mensagem estão em USD. Se o plano for cobrado em outra moeda, as duas são convertidas para a moeda escolhida acima, pelo câmbio de hoje.", "shopify": "Conectar o Shopify", "shopifyHint": "Necessário para carrinho abandonado, confirmação de pagamento na entrega e avisos automáticos. US$ 4,99 por mês em USD.", "srCountry": "País onde estão seus clientes", "srDetail": "Mostrar as notas explicativas", "srMsgs": " mensagens por mês", "svcLower": "As mensagens de serviço têm tarifa própria por país, menor que a de utilidade.", "svcSame": "Nesta tabela as mensagens de serviço são cobradas pela tarifa de utilidade.", "t001": "Descubra quanto o WhatsApp vai realmente custar por mês.", "t002": "Onde estão os seus clientes?", "t003": "Para que você usa o WhatsApp?", "t004": "Define números iniciais razoáveis. Tudo continua editável.", "t005": "Promoções e campanhas", "t006": "Atendimento ao cliente", "t007": "Avisos de pedido e entrega", "t008": "Logins e OTPs", "t009": "Um pouco de tudo", "t010": "Quantos números de WhatsApp?", "t011": "Um número atende à maioria. Números separados exigem o Business, e cada extra é cobrado por mês.", "t012": "Números conectados à Wati", "t013": "Quantas pessoas precisam de acesso?", "t014": "Todo mundo que responde conversas precisa de uma licença. O Growth inclui 3 e não permite ampliação por preço nenhum.", "t015": "Membros da equipe com acesso à Wati", "t016": "Quantas mensagens por mês?", "t017": "O WhatsApp cobra por mensagem entregue conforme a categoria, não por contato. Distribua seu volume mensal entre as três que custam.", "t018": "Marketing", "t019": "Ofertas, lançamentos, reengajamento, carrinho abandonado. De longe a categoria mais cara.", "t020": "Utilidade", "t021": "Avisos de pedido, entrega, pagamento e agendamento — tudo ligado a uma transação já feita.", "t022": "Autenticação", "t023": "Apenas senhas de uso único e códigos de acesso.", "t024": "Mensagens de serviço por mês", "t025": "Respostas livres enviadas por você na janela de 24 h. Cobradas por mensagem desde 1º out 2026, após as primeiras 1.000 do mês. O que entra é sempre grátis.", "t026": "O que mudou", "t027": "O que continua sem custo", "t028": "Tudo o que o cliente envia para você é gratuito.", "t029": ", por conta do WhatsApp Business, com reinício mensal.", "t030": "Grátis hoje. A Meta vai ampliar a janela para 7 dias; data a confirmar.", "t031": "as mensagens de serviço passam a ser cobradas por mensagem, e os modelos de utilidade dentro da janela de 24 h voltam a ser cobrados.", "t032": "Quanto roda no automático?", "t033": "Contado sempre que uma automação sua dispara para um cliente: chatbot, palavra-chave, regra de roteamento, sequência ou Flow. Se acabarem, as automações param até você recarregar. Extras são cobrados por faixas.", "t034": "Como os disparos são contados e cobrados", "t035": "Disparos de automação por mês", "t036": "Cerca de um por cliente que inicia uma conversa automatizada, mais um por acompanhamento automático. Ações por API não contam.", "t039": "Créditos de Wati AI por mês", "t040": "Um saldo compartilhado entre Wati AI e Astra. Grátis por mês: 2.000 Growth, 5.000 Pro, 20.000 Business. Deixe em 0 se a equipe não for usar IA.", "t041": "O Astra está incluído e os créditos agora são um saldo só", "t042": "— 1 no Growth, 2 no Pro, ilimitados no Business. IA de voz só no Business. Sem assinatura separada do Astra.", "t043": "o mesmo saldo cobre Wati AI e Astra. Os antigos créditos do AI Co-pilot foram descontinuados.", "t044": "expiram na sua data de faturamento e voltam ao valor do plano. Recargas também não acumulam.", "t045": "os pacotes de 1.000 créditos acabaram e o preço por crédito caiu pela metade.", "t046": "Como funcionam os planos em pacote e os créditos de IA, incluindo acúmulo", "t047": "Custo mensal estimado", "t048": "Wati Pro", "t049": "Melhor opção", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Total por mês", "t054": "Média por mensagem", "t055": "Anual", "t056": "Salvar como PDF", "t057": "Copiar para e-mail", "t058": "Os mesmos requisitos, precificados nos três planos", "t059": "Um plano mais barato nem sempre dá uma conta mais barata depois de contar usuários, recargas e tarifas por plano.", "t060": "Preços de plano, licença e complementos são os publicados. As tarifas por mensagem vêm da tabela desta região, em vigor desde 1º de outubro de 2026, conforme o país do destinatário. Níveis mais altos custam menos por mensagem.", "t061": "As tabelas estão com link na pergunta 1: abra a fonte na ligação em vez de citar de memória.", "t062": "A estimativa escolhe o plano mais barato que serve. Fixe um plano para cotar mais alto; o que ele não cobrir fica fora do total e é sinalizado.", "t063": "O limite de 15.000 disparos do Growth é comparado a marketing mais utilidade. Autenticação é por API, uma a uma, e não conta.", "t064": "Disparos incluídos: 1.000 / 2.000 / 5.000. Extras vão por faixas: você paga a primeira que te cobre.", "t065": "Créditos de Wati AI incluídos: 2.000 / 5.000 / 20.000, um saldo entre Wati AI e Astra. Extras vão por faixas e não acumulam.", "t066": "Agentes Astra vêm com o plano: 1 / 2 / ilimitados, IA de voz só no Business. Não é assinatura separada.", "t067": "Números extras exigem o Business. O Shopify é US$ 4,99 por mês em USD, então varia com o câmbio.", "t068": "As cobranças de mensagens saem de uma carteira pré-paga, separada da fatura da assinatura.", "t069": "Descontos por volume acima de cerca de um milhão de mensagens por mês não são modelados. Também fora: onboarding dedicado, gestão técnica de conta, serviços profissionais e selo verde.", "t070": "Estimativa mensal", "t071": "As taxas de câmbio vêm do Frankfurter, com a Exchange Rate API como reserva. Ambos publicam uma vez por dia, então é uma taxa de referência diária, não de fechamento. A Wati fatura em ; a taxa do seu banco no dia vai diferir um pouco.", "tagNoFit": "Não serve", "tagQuoting": "Cotando", "toolname": "Calculadora de custos do WhatsApp", "vCheapest": "<b>{0}</b> é o plano mais barato que atende ao que você pediu.", "vMsgShare": "As mensagens são {0}% do custo; a assinatura é a parte pequena.", "vNone": "Nenhum plano padrão cobre isso, então precisa de uma cotação sob medida. Mostrando o mais próximo.", "vOut1": "{0} está fora: {1}", "vOutMany": "{0} estão fora{1}.", "vPayg": "Nesse volume, {0} pode sair mais barato que qualquer assinatura; vale olhar.", "vPinned": "Você fixou <b>{0}</b>.", "vPinnedBest": "É também o plano mais barato que serve.", "vPinnedLess": "O mais barato que serve é <b>{0}</b> a {1}, então este custa {2} a menos por mês.", "vPinnedMore": "O mais barato que serve é <b>{0}</b> a {1}, então este custa {2} a mais por mês.", "vTierUp": "{0} também atende, mas custa {1} a mais por mês: as tarifas por mensagem são maiores e, nesse volume, isso pesa mais que a mensalidade menor.", "voice": "Preciso de um agente de IA de voz", "voiceHint": "A IA de voz é exclusiva do Business: marcar isto descarta Growth e Pro.", "wbPlain": "Não deu para carregar as taxas ao vivo, então o total usa taxas de referência. Clique em Atualizar taxas no painel antes de cotar.", "wbUsd": "Não deu para carregar as taxas ao vivo. As mensagens são cobradas em USD, então o total usa uma taxa de referência. Clique em Atualizar taxas no painel antes de cotar.", "whNote": "O Growth só trata regras por palavra-chave. Chatbots de várias etapas e webhooks começam no Pro.", "regionNote": "Cobrança no Brasil em reais, pela lista MAC 2026. Usa a tabela LATAM."}};
   var LANG_NAMES = { en:"English", es:"Espa\u00f1ol", pt:"Portugu\u00eas",
     id:"Bahasa Indonesia", ms:"Bahasa Melayu", "zh-Hans":"\u7b80\u4f53\u4e2d\u6587",
     "zh-Hant":"\u7e41\u9ad4\u4e2d\u6587", de:"Deutsch", fr:"Fran\u00e7ais" };
@@ -1695,6 +1752,20 @@
     else if (wide.addListener) wide.addListener(place);
   })();
 
+  // Details: off is the working view for a live call; on is the full explanation.
+  (function(){
+    var btn = $("detailBtn"), root = document.documentElement;
+    function set(on, save){
+      root.setAttribute("data-detail", on ? "on" : "off");
+      btn.setAttribute("aria-checked", String(on));
+      if (save){ try { localStorage.setItem("wati-detail", on ? "on" : "off"); } catch(e){} }
+    }
+    set(root.getAttribute("data-detail") === "on", false);
+    btn.addEventListener("click", function(){
+      set(root.getAttribute("data-detail") !== "on", true);
+    });
+  })();
+
   (function(){
     var btn = $("themeBtn"), root = document.documentElement;
     function sync(){
@@ -1811,16 +1882,18 @@
       if (!items.length) return;
       var h = document.createElement("p");
       h.className = "s-head"; h.textContent = g[1]; host.appendChild(h);
+      var grid = document.createElement("div"); grid.className = "ao-grid";
+      host.appendChild(grid);
       items.forEach(function(a){
         var hint = document.createElement("span");
-        hint.className = "hint";
-        hint.appendChild(document.createTextNode(T("ao_" + a.k + "_h", a.hint) + " "));
+        hint.className = "hint ex";
+        hint.appendChild(document.createTextNode(T("ao_" + a.k + "_h", a.hint)));
         var link = null;
         if (a.url){
           link = document.createElement("a");
+          link.className = "ao-link";
           link.href = a.url; link.target = "_blank"; link.rel = "noopener";
           link.textContent = T("aoLearn","What this does");
-          hint.appendChild(link);
         }
         var lab, rec = { a:a, hint:hint, link:link };
 
@@ -1832,6 +1905,7 @@
           lab.className = "field-label stack";
           lab.setAttribute("for", "ad_" + a.k);
           lab.appendChild(document.createTextNode(""));
+          if (link) lab.appendChild(link);
           lab.appendChild(hint);
           var num = document.createElement("input");
           num.className = "num"; num.type = "number"; num.id = "ad_" + a.k;
@@ -1846,7 +1920,7 @@
           });
           rec.el = lab; rec.note = note;
           ADDON_LABELS.push(rec);
-          host.appendChild(field);
+          grid.appendChild(field);
         } else {
           var row = document.createElement("div"); row.className = "check";
           var cb = document.createElement("input");
@@ -1855,12 +1929,14 @@
           var box = document.createElement("div");
           lab = document.createElement("label");
           lab.setAttribute("for", cb.id);
-          box.appendChild(lab); box.appendChild(hint);
+          box.appendChild(lab);
+          if (link) box.appendChild(link);
+          box.appendChild(hint);
           row.appendChild(cb); row.appendChild(box);
           cb.addEventListener("change", function(){ state.addons[a.k] = cb.checked ? 1 : 0; render(); });
           rec.el = lab;
           ADDON_LABELS.push(rec);
-          host.appendChild(row);
+          grid.appendChild(row);
         }
       });
     });
@@ -1962,7 +2038,7 @@
       a.target = "_blank"; a.rel = "noopener";
       a.appendChild(document.createTextNode(it.label + " "));
       var s = document.createElement("span");
-      s.textContent = it.card;
+      s.className = "rc-file"; s.textContent = it.card;
       a.appendChild(s);
       li.appendChild(a); ul.appendChild(li);
     });
@@ -2135,6 +2211,7 @@
       var was = T("t057","Copy for email");
       btn.textContent = ok ? T("copied","Copied — paste into your email")
                            : T("copyFail","Copy failed");
+      if (ok && window.__track) window.__track("copy");
       setTimeout(function(){ btn.textContent = was; }, 2200);
     }
     function plainOnly(){
@@ -2164,6 +2241,52 @@
   rebuildCcyOptions();
   render();
   fetchRates();
+
+  /* ============================================================
+     Usage tracking
+     Anonymous counts, so the team can see which calculators get used.
+     The payload carries the region, the event and two random ids kept in
+     this browser — never the volumes, prices or anything a customer typed.
+     ============================================================ */
+  (function(){
+    var URL = "https://script.google.com/macros/s/AKfycbz45ERWViNfVOAWMxIVZ2fWNN9pw22ldBNz0yJN26U3Y47lpVhevT3xLDZk7EmHTik/exec";
+    if (URL.indexOf("https://") !== 0) return;      // not configured: stay silent
+
+    function anonId(store, key){
+      try {
+        var v = store.getItem(key);
+        if (!v){
+          v = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          store.setItem(key, v);
+        }
+        return v;
+      } catch(e){ return ""; }                      // private window, blocked storage
+    }
+    var visitor = anonId(window.localStorage, "wati-calc-visitor");
+    var session = anonId(window.sessionStorage, "wati-calc-session");
+
+    window.__track = function(event){
+      var body = JSON.stringify({
+        region: CONFIG.region,
+        event: event,
+        visitor: visitor,
+        session: session,
+        lang: LANG,
+        ccy: state.outCcy
+      });
+      try {
+        // A beacon so it still lands when the tab closes; text/plain keeps it a
+        // simple request, so Apps Script never sees a CORS preflight.
+        if (navigator.sendBeacon){
+          navigator.sendBeacon(URL, new Blob([body], { type: "text/plain;charset=utf-8" }));
+        } else {
+          fetch(URL, { method: "POST", mode: "no-cors", keepalive: true,
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body });
+        }
+      } catch(e){}                                   // tracking never breaks the page
+    };
+    window.__track("view");
+  })();
 })();
 </script>
 </body>
